@@ -1,22 +1,21 @@
-from rest_framework.routers import SimpleRouter
-
 from django.urls import include, path
-from rest_framework_simplejwt import views as jwt_views
+from rest_framework import routers
 
-from .views import PostViewSet, CommentViewSet, GroupViewSet, FollowViewSet
+from api.views import CommentViewSet, FollowViewSet, GroupViewSet, PostViewSet
 
-appname = 'api'
+router = routers.DefaultRouter()
+router.register(r'posts', PostViewSet)
+router.register(r'groups', GroupViewSet)
+router.register(
+    r'posts/(?P<post_id>\d+)/comments',
+    CommentViewSet,
+    basename='comments',
+)
+router.register(r'follow', FollowViewSet, basename='follow')
 
-router = SimpleRouter()
-router.register('v1/posts', PostViewSet, basename='posts')
-router.register('v1/groups', GroupViewSet, basename='groups')
-router.register('v1/follow', FollowViewSet, basename='follow')
-router.register(r'^v1/posts/(?P<post_pk>\d+)/comments', CommentViewSet,
-                basename='comments')
 
 urlpatterns = [
-    path('v1/jwt/create/', jwt_views.TokenObtainPairView.as_view()),
-    path('v1/jwt/refresh/', jwt_views.TokenRefreshView.as_view()),
-    path('v1/jwt/verify/', jwt_views.TokenVerifyView.as_view()),
-    path('', include(router.urls)),
+    path('v1/', include(router.urls)),
+    path('v1/', include('djoser.urls')),
+    path('v1/', include('djoser.urls.jwt')),
 ]
